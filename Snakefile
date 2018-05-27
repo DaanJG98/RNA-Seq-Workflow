@@ -42,6 +42,7 @@ rule get_gene_info:
                 for id in file:
                     handle = Entrez.efetch(db="gene", id=id, retmode="xml")
                     record = Entrez.read(handle)
+                    organism = record[0]['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname']
                     genome = record[0]['Entrezgene_gene-source']['Gene-source']['Gene-source_src-str1']
                     start = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
                     stop = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
@@ -49,7 +50,7 @@ rule get_gene_info:
                     pubmed = []
                     for pubmed_id in refs:
                         pubmed.append(pubmed_id['Pub_pmid']['PubMedId'])
-                    out.write(genome+"\t"+start+"\t"+stop+"\t"+",".join(pubmed)+"\n")
+                    out.write(genome+"\t"+start+"\t"+stop+"\t"+organism+"\t"+",".join(pubmed)+"\n")
 
 rule get_sequence:
     input:
@@ -77,10 +78,108 @@ rule get_sequence:
 
 rule get_kegg_ids:
     input:
+        "data/RNA-seq-gene-info.txt",
         "data/RNA-seq-ids.txt"
     output:
         "data/RNA-seq-kegg-ids.txt"
     run:
-        from Bio.KEGG.REST import kegg_get
+        from Bio.KEGG import REST
+        with open(output[0],"w") as out:
+            with open(input[0],"r") as f1:
+                with open(input[1],"r") as f2:
+                    for idx, line in enumerate(f1):
+                        splittedinfo = line.split("\t")
+                        organism = splittedinfo[3]
+                        query = organism.replace(" ", "+")
+                        request = REST.kegg_find(database="genome",query=query).read()
+                        org_code = request.split("\t")[1].split(",")[0]
 
-        request = kegg_get("lpl:{id}")
+                        gene_id = f2.readline()
+                        request2 = REST.kegg_get(org_code+":"+gene_id).readlines()
+
+                        pathways = []
+                        isPathway = False
+
+                        for KEGG_report in iter(request2):
+                            if "PATHWAY" in KEGG_report:
+                                isPathway=True
+                                pathways.append(KEGG_report.strip("PATHWAY").lstrip().rstrip())
+                                continue
+                            if "BRITE" in KEGG_report or "MODULE" in KEGG_report or "POSITION" in KEGG_report:
+                                break
+                            if isPathway:
+                                pathways.append(KEGG_report.lstrip().rstrip())
+                        out.write(",".join(pathways)+"\n")
+
+rule get_genes_per_pubmed:
+    input:
+        "data/RNA-seq-gene-info.txt",
+        "data/RNA-seq-ids.txt"
+    output:
+        "data/RNA-seq-genes-per-pubmed.txt"
+    run:
+        with open(input[1]) as id_file:
+            with open(input[0]) as pubmed_file:
+
+                pubmed_dict = {}
+
+                for line in id_file:
+                    gene_id = line.rstrip()
+                    pubmed_ids = pubmed_file.readline().split("\t")[4].rstrip().split(",")
+
+                    for pm_id in pubmed_ids:
+                        if pm_id in pubmed_dict:
+                            pubmed_dict[pm_id].append(gene_id)
+                        if not pm_id in pubmed_dict:
+                            pubmed_dict[pm_id] = [gene_id]
+
+                with open(output[0], "w") as out:
+                    for pm in pubmed_dict:
+                        out.write(pm+"\t"+",".join(pubmed_dict[pm])+"\n")
+
+
+rule report:
+    input:
+        "data/RNA-seq-ids.txt",
+        "data/RNA-seq-ncbi-ids.txt",
+        "data/RNA-seq-gene-info.txt",
+        "data/RNA-seq-sequences.txt",
+        "data/RNA-seq-kegg-ids.txt",
+        "data/RNA-seq-genes-per-pubmed.txt"
+    output:
+        "report.html"
+    run:
+        from snakemake.utils import report
+        report_list = ["- ID NCBI_gene_id pubmed_ids"]
+        with open(input[0]) as id_file:
+            for idx, id in enumerate(id_file):
+                report_list.append("- "+id.rstrip())
+        with open(input[1]) as ncbi_file:
+            for idx, ncbi_id in enumerate(ncbi_file):
+                report_list[idx+1]+=" "+ncbi_id.rstrip()
+        with open(input[2]) as gene_info_file:
+            for idx, gene_info in enumerate(gene_info_file):
+                splitted_line = gene_info.split("\t")
+                pubmed_ids = splitted_line[4].rstrip()
+                report_list[idx+1]+=" "+pubmed_ids
+
+        #TODO: refactor report to match format: id: xxx \n
+        #                                       ncbi_id: xxx \n
+        #                                       etc. \n\n
+        #                                       id: xxx \n
+        report_string = "\n".join(report_list)
+
+        with open(input[5]) as pubmed_file:
+            pubmed_string = ""
+            for line in pubmed_file:
+                pubmed_string += line.replace("\t", ": ")
+
+        report("""
+        Example content report
+        ===================================================
+        {report_string}
+
+        PubMed
+        ----------------------------------------------------
+        {pubmed_string}
+        """, output[0])
