@@ -154,20 +154,16 @@ rule report:
         report_list = []
         with open(input[0]) as id_file:
             for idx, id in enumerate(id_file):
-                report_list.append("Gene id: "+id.rstrip()+"\n")
+                report_list.append("Gene id: "+id+"\n")
         with open(input[1]) as ncbi_file:
             for idx, ncbi_id in enumerate(ncbi_file):
-                report_list[idx]+="NCBI gene id: "+ncbi_id.rstrip()+"\n"
+                report_list[idx]+="NCBI gene id: "+ncbi_id+"\n"
         with open(input[2]) as gene_info_file:
             for idx, gene_info in enumerate(gene_info_file):
                 splitted_line = gene_info.split("\t")
                 pubmed_ids = splitted_line[4].rstrip()
-                report_list[idx]+=" "+pubmed_ids
+                report_list[idx]+="Pubmed ids: "+pubmed_ids+"\n\n"
 
-        #TODO: refactor report to match format: id: xxx \n
-        #                                       ncbi_id: xxx \n
-        #                                       etc. \n\n
-        #                                       id: xxx \n
         report_string = "\n".join(report_list)
 
         with open(input[5]) as pubmed_file:
