@@ -76,40 +76,41 @@ rule get_sequence:
 
                     out.write(str(GC(record[0]['TSeq_sequence']))+"\t"+record[0]['TSeq_sequence']+"\n")
 
+rule conv_kegg_ids:
+    input:
+        "data/RNA-seq-ncbi-ids.txt"
+    output:
+        "data/RNA-seq-conv-kegg.txt"
+    shell:
+        "./scripts/conv_kegg.sh args1 < {input} {output}"
+
 rule get_kegg_ids:
     input:
-        "data/RNA-seq-gene-info.txt",
-        "data/RNA-seq-ids.txt"
+        "data/RNA-seq-conv-kegg.txt"
     output:
         "data/RNA-seq-kegg-ids.txt"
     run:
         from Bio.KEGG import REST
         with open(output[0],"w") as out:
             with open(input[0],"r") as f1:
-                with open(input[1],"r") as f2:
-                    for idx, line in enumerate(f1):
-                        splittedinfo = line.split("\t")
-                        organism = splittedinfo[3]
-                        query = organism.replace(" ", "+")
-                        request = REST.kegg_find(database="genome",query=query).read()
-                        org_code = request.split("\t")[1].split(",")[0]
+                for line in f1:
+                    splittedinfo = line.split("\t")
+                    query = splittedinfo[1]
+                    request = REST.kegg_get(query).readlines()
 
-                        gene_id = f2.readline()
-                        request2 = REST.kegg_get(org_code+":"+gene_id).readlines()
+                    pathways = []
+                    isPathway = False
 
-                        pathways = []
-                        isPathway = False
-
-                        for KEGG_report in iter(request2):
-                            if "PATHWAY" in KEGG_report:
-                                isPathway=True
-                                pathways.append(KEGG_report.strip("PATHWAY").lstrip().rstrip())
-                                continue
-                            if "BRITE" in KEGG_report or "MODULE" in KEGG_report or "POSITION" in KEGG_report:
-                                break
-                            if isPathway:
-                                pathways.append(KEGG_report.lstrip().rstrip())
-                        out.write(",".join(pathways)+"\n")
+                    for KEGG_report in iter(request):
+                        if "PATHWAY" in KEGG_report:
+                            isPathway=True
+                            pathways.append(KEGG_report.strip("PATHWAY").lstrip().rstrip())
+                            continue
+                        if "BRITE" in KEGG_report or "MODULE" in KEGG_report or "POSITION" in KEGG_report:
+                            break
+                        if isPathway:
+                            pathways.append(KEGG_report.lstrip().rstrip())
+                    out.write(", ".join(pathways)+"\n")
 
 rule get_genes_per_pubmed:
     input:
