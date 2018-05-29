@@ -13,21 +13,14 @@ rule filter_ids:
                     else:
                         out.write((line.split("\t")[0]+"\n"))
 
-rule get_gene_ids:
+rule get_ncbi_ids:
     input:
         "data/RNA-seq-ids.txt"
     output:
         "data/RNA-seq-ncbi-ids.txt"
-    run:
-        import sys
-        from Bio import Entrez
-        Entrez.email=mail
-        with open(input[0]) as f:
-            for id in f:
-                handle = Entrez.esearch(db="gene", term=id,retmode="xml")
-                record = Entrez.read(handle)
-                with open(output[0], "a") as out:
-                    out.write(str(record["IdList"][0])+"\n")
+    shell:
+        "./scripts/get_ncbi_ids.sh args1 < {input} {output}"
+
 
 rule get_gene_info:
     input:
