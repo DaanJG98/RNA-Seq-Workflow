@@ -7,6 +7,7 @@ Snakemake can be run on both Linux and Windows machines, though we find it more 
 If you are on a Windows platform, don't worry there are multiple solutions:
 1. Setting up a Linux virtual machine with for example VirtualBox
 2. Using Vagrant to house your virtual machine. We recommend this option if you don't need Linux for other purposes
+
 In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linux VM
   
 
