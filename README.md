@@ -18,19 +18,17 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
      
   * Run the installer and check if vagrant installed correctly
         
-     * `> vagrant`
-   
-   
+     * `> vagrant` 
+  <br/> 
    
   #### Next checkout this git repo in a conveniet directory
   
   `> git clone https://github.com/DaanJG98/RNA-Seq-Workflow.git`
   
-  
+  <br/>
   
   #### cd into this directory
-  
-  
+  <br/>
   
   #### Create a 64-bit Ubuntu environment in this directory with:
 
@@ -41,9 +39,9 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
   To get into the virtual machine type:
 
   `> vagrant ssh`
-  
-  
-  
+ 
+  <br/>
+ 
   *Make sure you are into your Vagrant VM when performing the next steps*
   #### Installing Miniconda 3
   
@@ -53,7 +51,7 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
      
   You have to open a new terminal inorder to use conda
   
-  
+  <br/>
   
   #### Creating the environment using the provided environment file
   
@@ -66,23 +64,24 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
   To deactivate simply:
      
   `$ source deactivate`
+  
+  <br/>
    
+  #### Now the workflow can be run by using the `snakemake` command
    
-   
-   #### Now the workflow can be run by using the `snakemake` command
-   
-   `$ snakemake {optional parameters}`
-   
-   
-   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
-
-
+  `$ snakemake {optional parameters}`
+    
+  For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
+  
+  <br/>
+  <br/>
 
 ### Setup using a full Linux machine
   #### Start by checking out this git repo in a new directory
   
   `> git clone https://github.com/DaanJG98/RNA-Seq-Workflow.git`
   
+  <br/>
   
   #### Next install Miniconda 3
   
@@ -90,6 +89,7 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
     
   `$ bash Miniconda3-latest-Linux-x86_64.sh`
   
+  <br/>
   
   #### Create the environment with the provided environment file
   
