@@ -1,4 +1,9 @@
 mail="mymail@gmail.com"
+
+# rule all:
+#     input:
+#     "report.html"
+
 rule filter_ids:
     input:
         "RNA-Seq-counts-1.txt"
@@ -21,7 +26,6 @@ rule get_ncbi_ids:
     shell:
         "./scripts/get_ncbi_ids.sh args1 < {input} {output}"
 
-
 rule get_gene_info:
     input:
         "data/RNA-seq-ncbi-ids.txt"
@@ -40,10 +44,12 @@ rule get_gene_info:
                     start = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
                     stop = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
                     refs = record[0]['Entrezgene_locus'][0]['Gene-commentary_products'][0]['Gene-commentary_refs']
+                    desciption = record[0]['Entrezgene_prot']['Prot-ref']['Prot-ref_name'][0]
+                    
                     pubmed = []
                     for pubmed_id in refs:
                         pubmed.append(pubmed_id['Pub_pmid']['PubMedId'])
-                    out.write(genome+"\t"+start+"\t"+stop+"\t"+organism+"\t"+",".join(pubmed)+"\n")
+                    out.write(genome+"\t"+start+"\t"+stop+"\t"+organism+"\t"+",".join(pubmed)+"\t"+desciption+"\n")
 
 rule get_sequence:
     input:
@@ -131,7 +137,6 @@ rule get_genes_per_pubmed:
                     for pm in pubmed_dict:
                         out.write(pm+"\t"+",".join(pubmed_dict[pm])+"\n")
 
-
 rule report:
     input:
         "data/RNA-seq-ids.txt",
@@ -142,34 +147,35 @@ rule report:
         "data/RNA-seq-genes-per-pubmed.txt"
     output:
         "report.html"
-    run:
-        from snakemake.utils import report
-        report_list = []
-        with open(input[0]) as id_file:
-            for idx, id in enumerate(id_file):
-                report_list.append("Gene id: "+id+"\n")
-        with open(input[1]) as ncbi_file:
-            for idx, ncbi_id in enumerate(ncbi_file):
-                report_list[idx]+="NCBI gene id: "+ncbi_id+"\n"
-        with open(input[2]) as gene_info_file:
-            for idx, gene_info in enumerate(gene_info_file):
-                splitted_line = gene_info.split("\t")
-                pubmed_ids = splitted_line[4].rstrip()
-                report_list[idx]+="Pubmed ids: "+pubmed_ids+"\n\n"
-
-        report_string = "\n".join(report_list)
-
-        with open(input[5]) as pubmed_file:
-            pubmed_string = ""
-            for line in pubmed_file:
-                pubmed_string += line.replace("\t", ": ")
-
-        report("""
-        Example content report
-        ===================================================
-        {report_string}
-
-        PubMed
-        ----------------------------------------------------
-        {pubmed_string}
-        """, output[0])
+    script:
+        "scripts/report_parser.py"
+        # from snakemake.utils import report
+        # report_list = []
+        # with open(input[0]) as id_file:
+        #     for idx, id in enumerate(id_file):
+        #         report_list.append(id+"---------------------"+"\n")
+        # with open(input[1]) as ncbi_file:
+        #     for idx, ncbi_id in enumerate(ncbi_file):
+        #         report_list[idx]+="NCBI gene id: "+ncbi_id+"\n"
+        # with open(input[2]) as gene_info_file:
+        #     for idx, gene_info in enumerate(gene_info_file):
+        #         splitted_line = gene_info.split("\t")
+        #         pubmed_ids = splitted_line[4].rstrip()
+        #         report_list[idx]+="Pubmed ids: "+pubmed_ids+"\n\n"
+        #
+        # report_string = "\n".join(report_list)
+        #
+        # with open(input[5]) as pubmed_file:
+        #     pubmed_string = ""
+        #     for line in pubmed_file:
+        #         pubmed_string += line.replace("\t", ": ")
+        #
+        # report("""
+        # Example content report
+        # ===================================================
+        # {report_string}
+        #
+        # PubMed
+        # ----------------------------------------------------
+        # {pubmed_string}
+        # """, output[0])
