@@ -18,6 +18,14 @@ rule filter_ids:
                     else:
                         out.write((line.split("\t")[0]+"\n"))
 
+rule get_orthologs:
+    input:
+        "data/RNA-seq-ids.txt"
+    output:
+        "data/RNA-seq-orthologs.txt"
+    shell:
+        "./scripts/get_omadb_orthologs.sh args1 < {input} {output}"
+
 rule get_ncbi_ids:
     input:
         "data/RNA-seq-ids.txt"
