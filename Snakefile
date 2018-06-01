@@ -1,5 +1,5 @@
 mail="mymail@gmail.com"
-
+from os import listdir
 # rule all:
 #     input:
 #     "report.html"
@@ -45,19 +45,22 @@ rule get_gene_info:
         with open(output[0],'a') as out:
             with open(input[0]) as file:
                 for id in file:
-                    handle = Entrez.efetch(db="gene", id=id, retmode="xml")
-                    record = Entrez.read(handle)
-                    organism = record[0]['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname']
-                    genome = record[0]['Entrezgene_gene-source']['Gene-source']['Gene-source_src-str1']
-                    start = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
-                    stop = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
-                    refs = record[0]['Entrezgene_locus'][0]['Gene-commentary_products'][0]['Gene-commentary_refs']
-                    desciption = record[0]['Entrezgene_prot']['Prot-ref']['Prot-ref_name'][0]
+                    if not id.strip():
+                        continue
+                    else:
+                        handle = Entrez.efetch(db="gene", id=id, retmode="xml")
+                        record = Entrez.read(handle)
+                        organism = record[0]['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname']
+                        genome = record[0]['Entrezgene_gene-source']['Gene-source']['Gene-source_src-str1']
+                        start = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
+                        stop = record[0]['Entrezgene_locus'][0]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
+                        refs = record[0]['Entrezgene_locus'][0]['Gene-commentary_products'][0]['Gene-commentary_refs']
+                        desciption = record[0]['Entrezgene_prot']['Prot-ref']['Prot-ref_name'][0]
 
-                    pubmed = []
-                    for pubmed_id in refs:
-                        pubmed.append(pubmed_id['Pub_pmid']['PubMedId'])
-                    out.write(genome+"\t"+start+"\t"+stop+"\t"+organism+"\t"+",".join(pubmed)+"\t"+desciption+"\n")
+                        pubmed = []
+                        for pubmed_id in refs:
+                            pubmed.append(pubmed_id['Pub_pmid']['PubMedId'])
+                        out.write(genome+"\t"+start+"\t"+stop+"\t"+organism+"\t"+",".join(pubmed)+"\t"+desciption+"\n")
 
 rule get_sequence:
     input:
@@ -81,7 +84,9 @@ rule get_sequence:
                     handle = Entrez.efetch(db="nucleotide", id=genome, rettype="fasta", seq_start=start, seq_stop=stop, retmode="xml")
                     record = Entrez.read(handle)
 
-                    out.write(str(GC(record[0]['TSeq_sequence']))+"\t"+record[0]['TSeq_sequence']+"\n")
+                    gc = GC(record[0]['TSeq_sequence'])
+                    gc = format(round(gc, 2))
+                    out.write(gc+"\t"+record[0]['TSeq_sequence']+"\n")
 
 rule conv_kegg_ids:
     input:
@@ -132,14 +137,17 @@ rule get_genes_per_pubmed:
                 pubmed_dict = {}
 
                 for line in id_file:
-                    gene_id = line.rstrip()
-                    pubmed_ids = pubmed_file.readline().split("\t")[4].rstrip().split(",")
+                    if not line.strip():
+                        continue
+                    else:
+                        gene_id = line.rstrip()
+                        pubmed_ids = pubmed_file.readline().split("\t")[4].rstrip().split(",")
 
-                    for pm_id in pubmed_ids:
-                        if pm_id in pubmed_dict:
-                            pubmed_dict[pm_id].append(gene_id)
-                        if not pm_id in pubmed_dict:
-                            pubmed_dict[pm_id] = [gene_id]
+                        for pm_id in pubmed_ids:
+                            if pm_id in pubmed_dict:
+                                pubmed_dict[pm_id].append(gene_id)
+                            if not pm_id in pubmed_dict:
+                                pubmed_dict[pm_id] = [gene_id]
 
                 with open(output[0], "w") as out:
                     for pm in pubmed_dict:
@@ -150,9 +158,19 @@ rule create_gc_graphs:
         "data/RNA-seq-sequences.txt",
         "data/RNA-seq-ids.txt"
     output:
-        "data/figures/{gene}.png"
+        dynamic("data/figures/{gene}.png")
     script:
         "scripts/create_graph.R"
+
+def get_figures(wildcards):
+    path_list = []
+    with open("data/RNA-seq-ids.txt") as f:
+        for id in f:
+            if not id.split():
+                continue
+            else:
+                path_list.append("data/figures/"+id.rstrip()+".png")
+    return path_list
 
 rule report:
     input:
@@ -161,7 +179,8 @@ rule report:
         "data/RNA-seq-gene-info.txt",
         "data/RNA-seq-sequences.txt",
         "data/RNA-seq-kegg-ids.txt",
-        "data/RNA-seq-genes-per-pubmed.txt"
+        "data/RNA-seq-genes-per-pubmed.txt",
+        get_figures
     output:
         "report.html"
     script:

@@ -1,3 +1,4 @@
 data/*
 .snakemake/*
 report.html
+scripts/.snakemake*

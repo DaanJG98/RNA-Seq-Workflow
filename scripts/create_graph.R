@@ -9,7 +9,7 @@ create_gc_plot <- function(gc, id){
   png(file_name)
   pie(slices, labels = lbls, init.angle = 90, col=c("red","blue"),main=id)
   dev.off()
-  
+
 }
 
 sequences <- read.table(snakemake@input[[1]], header=F)
