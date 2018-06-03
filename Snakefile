@@ -6,7 +6,7 @@ from os import listdir
 
 rule filter_ids:
     input:
-        "RNA-Seq-counts-1.txt"
+        "RNA-Seq-counts.txt"
     output:
         "data/RNA-seq-ids.txt"
     run:
@@ -151,7 +151,7 @@ rule get_genes_per_pubmed:
 
                 with open(output[0], "w") as out:
                     for pm in pubmed_dict:
-                        out.write(pm+"\t"+",".join(pubmed_dict[pm])+"\n")
+                        out.write(pm+"\t"+", ".join(pubmed_dict[pm])+"\n")
 
 rule create_gc_graphs:
     input:
@@ -180,6 +180,7 @@ rule report:
         "data/RNA-seq-sequences.txt",
         "data/RNA-seq-kegg-ids.txt",
         "data/RNA-seq-genes-per-pubmed.txt",
+        "data/RNA-seq-orthologs.txt",
         get_figures
     output:
         "report.html"
