@@ -5,7 +5,10 @@ import re
 from snakemake.utils import report
 
 def sort_report_list(item):
-    return len(item.split("\n\n")[1].split(":")[1].split(","))
+    try:
+        return len(item.split("\n\n")[1].split(":")[1].split(","))
+    except IndexError:
+        return 0
 
 def prepare_gene_info(gene_ids, ncbi_ids, gene_info, sequence_file, kegg_ids, ortholog_file):
     report_list = []
