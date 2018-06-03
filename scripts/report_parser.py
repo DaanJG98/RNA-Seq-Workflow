@@ -4,6 +4,9 @@ import sys
 import re
 from snakemake.utils import report
 
+def sort_report_list(item):
+    return len(item.split("\n\n")[1].split(":")[1].split(","))
+
 def prepare_gene_info(gene_ids, ncbi_ids, gene_info, sequence_file, kegg_ids, ortholog_file):
     report_list = []
     # Open all input files and attach their content to a list bases on index
@@ -49,9 +52,8 @@ def prepare_gene_info(gene_ids, ncbi_ids, gene_info, sequence_file, kegg_ids, or
             refac_seq = re.sub("(.{85})", "\\1\n", sequence, 0, re.DOTALL)
             report_list[idx]+="Sequence: "+refac_seq+"\n\n"
 
-
-    # collect all data in a string to show in the report
-    report_string = "\n".join(report_list)
+    # collect all data in a string to show in the report, sorted by amount of pubmed ids
+    report_string = "\n".join(sorted(report_list, reverse=True, key=sort_report_list))
 
     return report_string
 
@@ -85,6 +87,5 @@ def create_report(report_string, pubmed_string, image_files):
 
 report_string = prepare_gene_info(snakemake.input[0], snakemake.input[1], snakemake.input[2], snakemake.input[3], snakemake.input[4], snakemake.input[6])
 pubmed_string = prepare_pubmed_info(snakemake.input[5])
-# image_string = prepare_image_string(snakemake.input[6:])
 
 create_report(report_string, pubmed_string, snakemake.input[7:])
