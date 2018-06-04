@@ -1,6 +1,7 @@
 # RNA-Seq-Workflow
 A workflow for getting gene information based on RNA-Seq data
 This workflow is build using Snakemake, a pythonic workflow system
+# algemeen uitleg, wat doet het etc.
 
 ## Get started
 Snakemake can be run on both Linux and Windows machines, though we find it more convenient to work with a Linux machine.
@@ -49,13 +50,13 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
      
   `$ bash Miniconda3-latest-Linux-x86_64.sh`
      
-  You have to open a new terminal inorder to use conda
+  You have to open a new terminal inorder to use conda, make sure to logged in to your virtual environment.
   
   <br/>
   
   #### Creating the environment using the provided environment file
   
-  `$ conda env create --name {your-environment-name} --file environment.yaml`
+  `$ conda env create --name {your-environment-name} --file /vagrant/environment.yaml`
   
   To activate your environment:
      
@@ -68,7 +69,9 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
   <br/>
    
   #### Now the workflow can be run by using the `snakemake` command
-   
+  
+  `$ cd /vagrant` 
+  
   `$ snakemake {optional parameters}`
     
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
@@ -104,3 +107,76 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
   `$ source deactivate`
   
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
+  
+  
+## Snakefile rules documentation
+
+| conv_kegg_ids   |                                                                   |
+| --------------- | :---------------------------------------------------------------- |
+| **Input**       | RNA-seq-ncbi-ids.txt                                              |
+| **Output**      | RNA-seq-conv-kegg.txt                                             |
+| **Script**      | conv_kegg.sh                                                      |
+| **Description** | Pass NCBI IDs to KEGG REST API and return corresponding KEGG IDs. |
+
+| create_gc_graphs |                                                 |
+| ---------------- | :---------------------------------------------- |
+| **Input**        | RNA-seq-sequences.txt, RNA-seq-ids.txt          |
+| **Output**       | {gene}.png                                      |
+| **Script**       | create_graph.R                                  |
+| **Description**  | Create graph showing GC% and AT% for each gene. |
+
+| filter_ids      |                               |
+| --------------- | :---------------------------- |
+| **Input**       | RNA-Seq-counts.txt            |
+| **Output**      | RNA-seq-ids.txt               |
+| **Script**      | In-rule Python script         |
+| **Description** | Filter IDs out of input file. |
+
+| get_gene_info   |                                                                                             |
+| --------------- | :------------------------------------------------------------------------------------------ |
+| **Input**       | RNA-seq-ncbi-ids.txt                                                                        |
+| **Output**      | RNA-seq-gene-info.txt                                                                       |
+| **Script**      | In-rule Python script                                                                       |
+| **Description** | Fetch gene data from Entrez, make selection of specific attributes and return these values. |
+
+| get_genes_per_pubmed   |                                                 |
+| ---------------------- | :---------------------------------------------- |
+| **Input**              | RNA-seq-gene-info.txt, RNA-seq-ids.txt          |
+| **Output**             | RNA-seq-ids.txt                                 |
+| **Script**             | In-rule Python script                           |
+| **Description**        | Get per PubMed article the corresponding genes. |
+
+| get_kegg_ids    |                                                                       |
+| --------------- | :-------------------------------------------------------------------- |
+| **Input**       | RNA-seq-conv-kegg.txt                                                 |
+| **Output**      | RNA-seq-kegg-ids.txt                                                  |
+| **Script**      | In-rule Python script                                                 |
+| **Description** | Pass KEGG IDs to Bio.KEGG REST and return corresponding pathway IDs.  |
+
+| get_ncbi_ids    |                                                                  |
+| --------------- | :--------------------------------------------------------------- |
+| **Input**       | RNA-seq-ids.txt                                                  |
+| **Output**      | RNA-seq-ncbi-ids.txt                                             |
+| **Script**      | get_ncbi_ids.sh                                                  |
+| **Description** | Pass IDs from input to Entrez and return corresponding NCBI IDs. |
+
+| get_orthologs   |                                                                                   |
+| --------------- | :-------------------------------------------------------------------------------- |
+| **Input**       | RNA-seq-ids.txt                                                                   |
+| **Output**      | RNA-seq-orthologs.txt                                                             |
+| **Script**      | get_omadb_orthologs.sh                                                            |
+| **Description** | Pass IDs from input to OMA Browser API and return IDs of corresponding orthologs. |
+
+| get_sequence    |                                                                                                 |
+| --------------- | :---------------------------------------------------------------------------------------------- |
+| **Input**       | RNA-seq-gene-info.txt                                                                           |
+| **Output**      | RNA-seq-sequences.txt                                                                           |
+| **Script**      | In-rule Python script                                                                           |
+| **Description** | Fetch specific sequence in genome from Entrez, calculate GC-percentage and return these values. |
+
+| report          |                                                                 |
+| --------------- | :-------------------------------------------------------------- |
+| **Input**       | RNA-seq-ids.txt, RNA-seq-ncbi-ids.txt, RNA-seq-gene-info.txt, RNA-seq-sequences.txt, RNA-seq-kegg-ids.txt, RNA-seq-genes-per-pubmed.txt, RNA-seq-orthologs.txt                        |
+| **Output**      | report.html                                                     |
+| **Script**      | report_parser.py                                                |
+| **Description** | Parse all output data from previous rules into a single report. |
