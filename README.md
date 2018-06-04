@@ -1,5 +1,5 @@
 # RNA-Seq-Workflow
-A workflow for getting information for genes based on RNA-seq data. This workflow was built using Snakemake, a pythonic workflow system, and uses Python, Shell and R scripts for its various tasks. The workflow gathers the following information for genes and returns it a human-readable report:
+A workflow for getting information for genes based on RNA-seq data. This workflow was built using Snakemake, a pythonic workflow system, and uses Python, Shell and R scripts for its various tasks. The workflow gathers the following information for genes and returns it in a human-readable report:
 * NCBI ID
 * Nucleotide sequence and GC-percentage
 * Literature (PubMed)
@@ -11,12 +11,13 @@ A workflow for getting information for genes based on RNA-seq data. This workflo
 Snakemake can be run on both Linux and Windows machines, though we find it more convenient to work with a Linux machine.
 If you are on a Windows platform, don't worry there are multiple solutions:
 1. Setting up a Linux virtual machine with for example VirtualBox
-2. Using Vagrant to house your virtual machine. We recommend this option if you don't need Linux for other purposes
+2. Using Vagrant to house your virtual machine. ~~We recommend this option if you don't need Linux for other purposes
 
 In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linux VM
   
 
 ### Setup using Vagrant
+_Currently we are experiencing some difficulties trying to run shell scripts in a vagrant environment_
   #### First you need to download and install [Vagrant](https://www.vagrantup.com/downloads.html)
   
   * Download the right package for your operating system
