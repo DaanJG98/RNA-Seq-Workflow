@@ -1,10 +1,11 @@
 # Script parsing RNA-seq-workflow result and report them
 
-import sys
 import re
 from snakemake.utils import report
 
-def sort_report_list(item):
+# return the amount of pubmed ids for a gene.
+# if empty, IndexError, it returns 0
+def n_pubmed_ids(item):
     try:
         return len(item.split("\n\n")[1].split(":")[1].split(","))
     except IndexError:
@@ -55,8 +56,8 @@ def prepare_gene_info(gene_ids, ncbi_ids, gene_info, sequence_file, kegg_ids, or
             refac_seq = re.sub("(.{85})", "\\1\n", sequence, 0, re.DOTALL)
             report_list[idx]+="Sequence: "+refac_seq+"\n\n"
 
-    # collect all data in a string to show in the report, sorted by amount of pubmed ids
-    report_string = "\n".join(sorted(report_list, reverse=True, key=sort_report_list))
+    # collect all data in a string to show in the report, sorted by amount of pubmed ids using the n_pubmed_ids function
+    report_string = "\n".join(sorted(report_list, reverse=True, key=n_pubmed_ids))
 
     return report_string
 

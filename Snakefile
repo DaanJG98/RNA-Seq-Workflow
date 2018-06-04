@@ -1,8 +1,8 @@
 mail="mymail@gmail.com"
 from os import listdir
-# rule all:
-#     input:
-#     "report.html"
+rule all:
+    input:
+        "report.html"
 
 rule filter_ids:
     input:
