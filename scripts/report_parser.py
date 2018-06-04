@@ -79,7 +79,7 @@ def create_report(report_string, pubmed_string, image_files):
     """
 
     report("""
-    Example content report
+    RNA-seq gene information report
     ===================================================
     {report_string}
 
@@ -87,7 +87,7 @@ def create_report(report_string, pubmed_string, image_files):
     ----------------------------------------------------
     {pubmed_string}
 
-    """+image_string, snakemake.output[0])
+    """+image_string, snakemake.output[0], metadata="Authors: Daan Gilissen and Koen Rademaker (support: daangilissen@gmail.com)")
 
 report_string = prepare_gene_info(snakemake.input[0], snakemake.input[1], snakemake.input[2], snakemake.input[3], snakemake.input[4], snakemake.input[6])
 pubmed_string = prepare_pubmed_info(snakemake.input[5])
