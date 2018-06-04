@@ -11,7 +11,7 @@ A workflow for getting information for genes based on RNA-seq data. This workflo
 Snakemake can be run on both Linux and Windows machines, though we find it more convenient to work with a Linux machine.
 If you are on a Windows platform, don't worry there are multiple solutions:
 1. Setting up a Linux virtual machine with for example VirtualBox
-2. Using Vagrant to house your virtual machine. ~~We recommend this option if you don't need Linux for other purposes
+2. Using Vagrant to house your virtual machine. ~~We recommend this option if you don't need Linux for other purposes~~
 
 In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linux VM
   
@@ -78,7 +78,9 @@ _Currently we are experiencing some difficulties trying to run shell scripts in 
   `$ cd /vagrant` 
   
   `$ snakemake {optional parameters}`
-    
+  
+  In order to run the complete workflow, `$ snakemake data/RNA-seq-ids.txt` must be ran previously
+  
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
   
   <br/>
@@ -111,7 +113,20 @@ _Currently we are experiencing some difficulties trying to run shell scripts in 
 
   `$ source deactivate`
   
+  <br/>
+  
+  #### Now the workflow can be run by using the `snakemake` command
+  
+  `$ cd /vagrant` 
+  
+  `$ snakemake {optional parameters}`
+  
+  In order to run the complete workflow, `$ snakemake data/RNA-seq-ids.txt` must be ran previously
+  
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
+  
+  <br/>
+  <br/>
   
 ### Data format
 RNA-seq data should be provided in the following, tab separated, format:
