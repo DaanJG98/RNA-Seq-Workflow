@@ -117,8 +117,6 @@ _Currently we are experiencing some difficulties trying to run shell scripts in 
   
   #### Now the workflow can be run by using the `snakemake` command
   
-  `$ cd /vagrant` 
-  
   `$ snakemake {optional parameters}`
   
   In order to run the complete workflow, `$ snakemake data/RNA-seq-ids.txt` must be ran previously
