@@ -1,9 +1,13 @@
 # RNA-Seq-Workflow
-A workflow for getting gene information based on RNA-Seq data
-This workflow is build using Snakemake, a pythonic workflow system
-# algemeen uitleg, wat doet het etc.
+A workflow for getting information for genes based on RNA-seq data. This workflow was built using Snakemake, a pythonic workflow system, and uses Python, Shell and R scripts for its various tasks. The workflow gathers the following information for genes and returns it a human-readable report:
+* NCBI ID
+* Nucleotide sequence and GC-percentage
+* Literature (PubMed)
+* KEGG pathways
+* Orthologs
 
 ## Get started
+
 Snakemake can be run on both Linux and Windows machines, though we find it more convenient to work with a Linux machine.
 If you are on a Windows platform, don't worry there are multiple solutions:
 1. Setting up a Linux virtual machine with for example VirtualBox
@@ -108,6 +112,14 @@ In this readme we'll cover the setup for both a full Linux OS and a Vagrant Linu
   
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
   
+### Data format
+RNA-seq data should be provided in the following, tab separated, format:
+
+| ID     | Condition 1 | Condition ...  |
+| :----: | :---------: | :------------: |
+| gene A | {value}     | ...            |
+| gene B | {value}     | ...            |
+| ...    | ...         | ...            |  
   
 ## Snakefile rules documentation
 
