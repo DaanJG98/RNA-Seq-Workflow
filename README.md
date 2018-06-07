@@ -81,6 +81,10 @@ _Currently we are experiencing some difficulties trying to run shell scripts in 
   
   In order to run the complete workflow, `$ snakemake data/RNA-seq-ids.txt` must be ran previously
   
+  If you like to see the DAG of the workflow, use the `$snakemake --dag` command
+  
+  For saving the DAG to a file use: `$snakemake --dag | dot -Tpdf > dag.pdf`
+  
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
   
   <br/>
@@ -120,6 +124,10 @@ _Currently we are experiencing some difficulties trying to run shell scripts in 
   `$ snakemake {optional parameters}`
   
   In order to run the complete workflow, `$ snakemake data/RNA-seq-ids.txt` must be ran previously
+  
+  If you like to see the DAG of the workflow, use the `$snakemake --dag` command
+  
+  For saving the DAG to a file use: `$snakemake --dag | dot -Tpdf > dag.pdf`
   
   For more info about snakemake check the docs at: [snakemake docs](http://snakemake.readthedocs.io/en/stable/)
   
